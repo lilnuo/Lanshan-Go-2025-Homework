@@ -2,8 +2,9 @@ package storage
 
 import (
 	"fmt"
-	"lesson6/model"
 	"sync"
+
+	"lesson6.1/model"
 )
 
 type Storage interface {
@@ -28,8 +29,8 @@ func (m *MemoryStorage) Create(task *model.Task) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.idCount++
-	taskID := fmt.Sprintf("%d", m.idCount)
-	m.tasks[taskID] = task
+	task.ID = fmt.Sprintf("%d", m.idCount)
+	m.tasks[task.ID] = task
 	return nil
 }
 func (m *MemoryStorage) GetById(id string) (*model.Task, error) {

@@ -71,12 +71,6 @@ func (p *peoplemonitor) Updatetotal(people string, newIQ int) {
 			if newIQ < p.to[i].normaliq {
 				p.sendAlerts(people)
 			}
-			if newIQ > p.to[i].normaliq {
-				fmt.Printf("'%s'是我男神\n", people)
-			}
-			if newIQ == p.to[i].normaliq {
-				fmt.Printf("'%s'是我女神\n", people)
-			}
 			break
 		}
 	}

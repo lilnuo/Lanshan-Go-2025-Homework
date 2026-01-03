@@ -46,7 +46,7 @@ func GenerateToken(user User) (string, error) {
 }
 func AuthMiddleware() app.HandlerFunc {
 	return func(ctx context.Context, c *app.RequestContext) {
-		var authHeader string = string(c.GetHeader("Authorization"))
+		authHeader := string(c.GetHeader("Authorization"))
 		if authHeader == "" {
 			c.JSON(consts.StatusUnauthorized, map[string]string{"error": "未登录"})
 			c.Abort()
@@ -91,45 +91,45 @@ func RequireRole(requiredRole string) app.HandlerFunc {
 }
 func Login(ctx context.Context, c *app.RequestContext) {
 	var u User
-	if err:=c.BindAndValidate(&u);err!=nil{
-		c.JSON(consts.StatusBadRequest, map[string]string{"error": "参数错误"}
+	if err := c.BindAndValidate(&u); err != nil {
+		c.JSON(consts.StatusBadRequest, map[string]string{"error": "参数错误"})
 		return
 	}
-	storedUser,exists:=userDB[u.Username]
-	if !exists||storedUser.Password != u.Password {
-		c.JSON(consts.StatusUnauthorized,map[string]string{"error":"账号或密码错误"})
+	storedUser, exists := userDB[u.Username]
+	if !exists || storedUser.Password != u.Password {
+		c.JSON(consts.StatusUnauthorized, map[string]string{"error": "账号或密码错误"})
 		return
 	}
-	token,_:=GenerateToken(storedUser)
+	token, _ := GenerateToken(storedUser)
 	c.JSON(consts.StatusOK, map[string]string{
-		"msg":"login success",
-		"token":token,
-		"role":storedUser.Role,
+		"msg":   "login success",
+		"token": token,
+		"role":  storedUser.Role,
 	})
 }
 func GetProfile(ctx context.Context, c *app.RequestContext) {
-	username:=c.Param("username")
+	username := c.Param("username")
 	c.JSON(consts.StatusOK, map[string]string{
-		"msg":"get profile success",
-		"username":username
+		"msg":      "get profile success",
+		"username": username,
 	})
 }
 func DeleteUser(ctx context.Context, c *app.RequestContext) {
 	c.JSON(consts.StatusOK, map[string]string{
-		"msg":"delete user success",
+		"msg": "delete user success",
 	})
 }
-func main(){
-	h:=server.Default(server.WithHostPorts(":8080"))
+func main() {
+	h := server.Default(server.WithHostPorts(":8080"))
 	h.POST("/login", Login)
-	authGroup:=h.Group("/api")
+	authGroup := h.Group("/api")
 	authGroup.Use(AuthMiddleware())
 	{
-		authGroup.GET("/profile",GetProfile)
-		adminGroup:=h.Group("/admin")
+		authGroup.GET("/profile", GetProfile)
+		adminGroup := h.Group("/admin")
 		adminGroup.Use(RequireRole("admin"))
 		{
-			adminGroup.DELETE("/users",DeleteUser)
+			adminGroup.DELETE("/users", DeleteUser)
 		}
 	}
 	h.Spin()
